@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#581C59">
+<title>Inicio</title>
+<style>
+  /* ============ COLORES (cámbialos aquí y se actualiza toda la página) ============ */
+  :root {
+    --fondo:        #581C59;   /* fondo principal: color de ARRIBA del degradado */
+    --fondo-2:      #351040;   /* color de ABAJO del degradado (un morado más oscuro) */
+    --direccion:    180deg;    /* 180deg = de arriba hacia abajo | 135deg = en diagonal | 90deg = de izquierda a derecha */
+    --llamativo:    #F2E205;   /* amarillo vivo: borde y brillo del botón */
+    --boton-claro:  #D9BA1E;   /* variación 1 del botón */
+    --boton-oscuro: #A67C2E;   /* variación 2 del botón */
+    --barra:        #201A42;   /* barra inferior */
+    --texto:        #ffffff;
+    --logo-x:       20px;      /* ← MUEVE EL LOGO A LOS LADOS: + a la derecha, - a la izquierda (ej. 30px, -8px, 0px) */
+    --logo-y:       0px;       /* mueve el logo principal: + hacia abajo, - hacia arriba     (ej. 12px, -20px) */
+  }
+
+  html, body { height: 100%; margin: 0; background: var(--fondo); }
+  body {
+    height: 100dvh;                      /* alto real en celular (descuenta la barra del navegador) */
+    overflow: hidden;
+    display: flex; flex-direction: column;
+    color: var(--texto);
+    font-family: system-ui, -apple-system, "Segoe UI", sans-serif;
+    -webkit-tap-highlight-color: transparent;
+    overscroll-behavior: none;
+  }
+
+  /* Zona principal: logo y botón, centrados */
+  main {
+    flex: 1; min-height: 0;
+    background: linear-gradient(var(--direccion), var(--fondo), var(--fondo-2));   /* degradado del fondo */
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+    gap: 1.6rem;
+    padding: 1.5rem;
+    overflow: hidden;                    /* el logo parte desde arriba, fuera de pantalla */
+  }
+
+  /* Logo principal: baja desde arriba al entrar a la página */
+  #logo {
+    display: block;
+    width: min(75vw, 22rem);             /* ← tamaño del logo; cámbialo si lo quieres más grande o chico */
+    max-height: 38dvh;
+    height: auto; object-fit: contain;
+    position: relative; left: var(--logo-x); top: var(--logo-y);   /* ajuste manual de posición */
+    opacity: 0;                          /* se muestra (y baja) cuando la imagen ya está lista */
+  }
+  #logo.listo { animation: bajar 1.3s cubic-bezier(.22, 1, .36, 1) both; }
+  @keyframes bajar {
+    0%   { transform: translateY(-110dvh); opacity: 0; }
+    15%  { opacity: 1; }
+    100% { transform: translateY(0); opacity: 1; }
+  }
+
+  /* Texto entre el logo y el botón (se edita en TEXTO, abajo en la configuración) */
+  #texto {
+    margin: 0; max-width: 20rem;
+    text-align: center; color: var(--texto);
+    font-size: 1.05rem; line-height: 1.55;
+    white-space: pre-line;               /* respeta los saltos de línea \n del texto */
+    animation: aparece .7s ease-out .9s both;
+  }
+  #texto[hidden] { display: none; }
+
+  /* Botón de inicio: aparece cuando el logo ya llegó */
+  #start {
+    font: inherit; font-size: 1.15rem; font-weight: 700; letter-spacing: .03em;
+    color: var(--texto);
+    text-shadow: 0 1px 3px rgba(88, 28, 89, .85);      /* ayuda a leer el texto blanco sobre el amarillo */
+    background: linear-gradient(180deg, var(--boton-claro), var(--boton-oscuro));
+    border: 3px solid var(--llamativo);
+    border-radius: 999px;
+    width: min(100%, 20rem); min-height: 3.6rem;       /* área cómoda para el dedo */
+    cursor: pointer; touch-action: manipulation;
+    box-shadow: 0 0 22px rgba(242, 226, 5, .35);
+    transition: transform .15s, box-shadow .2s, filter .2s;
+    animation: aparece .7s ease-out 1s both;
+  }
+  #start:active { transform: scale(.97); filter: brightness(.9); }
+  #start:focus-visible { outline: 3px solid #fff; outline-offset: 4px; }
+  @media (hover: hover) { #start:hover { box-shadow: 0 0 32px rgba(242, 226, 5, .65); filter: brightness(1.08); } }
+  @keyframes aparece {
+    from { opacity: 0; transform: translateY(14px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+
+  /* Barra inferior de color sólido con el logo estático */
+  footer {
+    flex: none;
+    display: flex; align-items: center; justify-content: center;
+    background: var(--barra);
+    padding: .9rem 1rem calc(.9rem + env(safe-area-inset-bottom, 0px));
+  }
+  #logo-barra { display: block; height: 2.8rem; width: auto; max-width: 70vw; object-fit: contain; }  /* ← tamaño del logo de la barra */
+
+  /* Si falta alguna imagen, se ve un recuadro con el nombre del archivo que hay que subir */
+  .falta {
+    display: flex; align-items: center; justify-content: center; text-align: center;
+    border: 2px dashed rgba(255, 255, 255, .5); border-radius: 12px;
+    color: rgba(255, 255, 255, .8); font-size: .9rem; padding: 1rem;
+  }
+  #logo.falta { width: min(75vw, 22rem); height: 12rem; }
+  #logo-barra.falta { height: 2.8rem; padding: 0 1rem; }
+
+  @media (prefers-reduced-motion: reduce) {
+    #logo.listo, #texto, #start { animation: none; }
+    #logo.listo { opacity: 1; }
+    #start { transition: none; }
+  }
+</style>
+</head>
+<body>
+
+  <main>
+    <!-- Logo principal (PNG): baja desde arriba al cargar -->
+    <img id="logo" alt="Logo">
+    <p id="texto"></p>
+    <button id="start" type="button">INICIAR</button>
+  </main>
+
+  <!-- Barra inferior: color sólido + logo fijo -->
+  <footer>
+    <img id="logo-barra" alt="Logo secundario">
+  </footer>
+
+<script>
+  /* ============ CONFIGURACIÓN ============ */
+  const LOGO_SRC       = "Banner.png";        // logo principal (el que baja y queda en medio)
+  const LOGO_BARRA_SRC = "LogoBarra.png";   // logo de la barra inferior (estático)
+  const NEXT_PAGE      = "AR.html";    // página a la que lleva el botón
+  const RECORTAR_LOGOS = true;   // quita el margen transparente de tus PNG para que el logo quede realmente centrado
+  // Texto entre el logo y el botón. Usa \n para un salto de línea. Déjalo vacío ("") para ocultarlo.
+  const TEXTO = "Escanea los stickers, completa el rompecabezas y desbloquea tu wallpaper.";
+  /* ======================================= */
+
+  // Quita los bordes transparentes de un PNG (devuelve una imagen recortada, o la original si no hace falta)
+  function recortar(img) {
+    try {
+      const c = document.createElement("canvas");
+      c.width = img.naturalWidth; c.height = img.naturalHeight;
+      const g = c.getContext("2d", { willReadFrequently: true });
+      g.drawImage(img, 0, 0);
+      const d = g.getImageData(0, 0, c.width, c.height).data;
+      let x0 = c.width, y0 = c.height, x1 = -1, y1 = -1;
+      for (let y = 0; y < c.height; y++) {
+        for (let x = 0; x < c.width; x++) {
+          if (d[(y * c.width + x) * 4 + 3] > 10) {
+            if (x < x0) x0 = x; if (x > x1) x1 = x;
+            if (y < y0) y0 = y; if (y > y1) y1 = y;
+          }
+        }
+      }
+      if (x1 < 0) return null;                                   // imagen totalmente transparente
+      const w = x1 - x0 + 1, h = y1 - y0 + 1;
+      if (w >= c.width - 2 && h >= c.height - 2) return null;    // ya no tiene margen
+      const o = document.createElement("canvas"); o.width = w; o.height = h;
+      o.getContext("2d").drawImage(c, x0, y0, w, h, 0, 0, w, h);
+      return o.toDataURL("image/png");
+    } catch (e) { return null; }   // p. ej. al abrir con file:// el navegador no deja leer la imagen
+  }
+
+  // Carga la imagen; si el archivo no existe muestra un recuadro avisando cuál falta
+  function ponerLogo(id, src) {
+    const img = document.getElementById(id);
+    const mostrar = url => {
+      img.onload = () => img.classList.add("listo");
+      img.src = url;
+    };
+    const prueba = new Image();
+    prueba.onload = () => mostrar((RECORTAR_LOGOS && recortar(prueba)) || src);
+    prueba.onerror = () => {
+      const caja = document.createElement("div");
+      caja.id = id; caja.className = "falta listo";
+      caja.textContent = "Falta " + src;
+      img.replaceWith(caja);
+    };
+    prueba.src = src;
+  }
+  ponerLogo("logo", LOGO_SRC);
+  ponerLogo("logo-barra", LOGO_BARRA_SRC);
+
+  const texto = document.getElementById("texto");
+  texto.textContent = TEXTO;
+  texto.hidden = !TEXTO.trim();
+
+  document.getElementById("start").addEventListener("click", () => {
+    window.location.href = NEXT_PAGE;
+  });
+</script>
+</body>
+</html>
