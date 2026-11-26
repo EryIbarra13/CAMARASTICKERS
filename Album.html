@@ -1,0 +1,286 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#000000">
+<title>Álbum · Rompecabezas</title>
+<style>
+  :root { --verde: #1fa23a; --tenue: #5d7a63; --fondo-pieza: #07120a; }
+  html, body { margin: 0; background: #000; }
+  body {
+    min-height: 100dvh;
+    color: #cfe9d3;
+    font-family: Georgia, "Times New Roman", serif;
+    -webkit-tap-highlight-color: transparent;
+    padding: 1.5rem 1.25rem calc(6.5rem + env(safe-area-inset-bottom, 0px));
+    box-sizing: border-box;
+  }
+  main { max-width: 36rem; margin: 0 auto; }
+  h1 { margin: 0 0 .4rem; font-size: 1.8rem; color: var(--verde); }
+  .sub { margin: 0 0 1.2rem; color: var(--tenue); line-height: 1.45; }
+
+  /* Progreso */
+  .progreso { display: flex; justify-content: space-between; align-items: baseline; margin-bottom: .5rem; }
+  .progreso strong { font-size: 1.25rem; color: #fff; }
+  .progreso span { color: var(--tenue); font-size: .95rem; }
+  .barra { height: 6px; background: #0e2314; margin-bottom: 1.1rem; overflow: hidden; }
+  .barra i { display: block; height: 100%; width: 0; background: var(--verde); transition: width .6s ease; }
+
+  /* Tablero: su proporción es la de la imagen; --ratio lo pone el script */
+  .tablero {
+    position: relative; margin: 0 auto;
+    aspect-ratio: var(--ratio, 0.5625);
+    width: min(100%, calc(68dvh * var(--ratio, 0.5625)));
+    background: var(--fondo-pieza);
+    border: 2px solid var(--verde);
+    box-sizing: content-box;
+  }
+  .pieza {
+    position: absolute; padding: 0; margin: 0; border: 0; cursor: pointer;
+    font: inherit; color: var(--tenue); touch-action: manipulation;
+    background-color: var(--fondo-pieza);
+    box-shadow: inset 0 0 0 1px #1d4a29;
+    display: flex; align-items: center; justify-content: center;
+    transition: box-shadow .6s;
+  }
+  .pieza svg { width: 38%; max-width: 1.7rem; height: auto; opacity: .75; }
+  .pieza.abierta { color: transparent; box-shadow: inset 0 0 0 1px rgba(0,0,0,.55); }
+  .pieza.abierta svg { display: none; }
+  .pieza.nueva { animation: aparece 1.1s ease-out both; }
+  .pieza:focus-visible { outline: 3px solid #fff; outline-offset: -3px; z-index: 2; }
+  @media (hover: hover) { .pieza:hover { box-shadow: inset 0 0 0 2px var(--verde); z-index: 1; } }
+  @keyframes aparece {
+    0%   { filter: brightness(3) saturate(0); opacity: 0; transform: scale(.85); }
+    55%  { filter: brightness(1.6); opacity: 1; transform: scale(1.04); z-index: 3; }
+    100% { filter: none; opacity: 1; transform: scale(1); }
+  }
+
+  /* Rompecabezas completo: se funden las costuras */
+  .tablero.completo { border-color: #fff; box-shadow: 0 0 28px rgba(31,162,58,.55); }
+  .tablero.completo .pieza { box-shadow: none; cursor: default; }
+  .tablero.celebrar { animation: brillo 1.6s ease-out 1; }
+  @keyframes brillo { 0% { box-shadow: 0 0 0 rgba(31,162,58,0); } 40% { box-shadow: 0 0 60px rgba(31,162,58,1); } 100% { box-shadow: 0 0 28px rgba(31,162,58,.55); } }
+
+  .aviso { text-align: center; color: var(--tenue); margin: 1rem 0 0; line-height: 1.45; }
+  .aviso.error { color: #e06a6a; }
+  .final { text-align: center; margin-top: 1.2rem; }
+  .final h2 { margin: 0 0 .3rem; font-size: 1.3rem; color: #fff; }
+  .final p { margin: 0 0 1rem; color: var(--tenue); }
+  .final .btn { display: inline-flex; align-items: center; justify-content: center; padding: 0 1.6rem; text-decoration: none; box-sizing: border-box; }
+  [hidden] { display: none !important; }
+
+  /* Ventana de información */
+  dialog {
+    width: min(92vw, 30rem); max-height: 88dvh; overflow: auto; box-sizing: border-box;
+    background: #07120a; color: #cfe9d3; border: 2px solid var(--verde); padding: 0;
+  }
+  dialog::backdrop { background: rgba(0,0,0,.8); }
+  .info img { width: 100%; max-height: 50dvh; object-fit: contain; display: block; background: #000; }
+  .info .texto { padding: 1.1rem 1.25rem 1.25rem; }
+  .info h3 { margin: 0 0 .8rem; font-size: 1.35rem; color: #fff; }
+  .info dt { color: var(--tenue); font-size: .85rem; margin-top: .7rem; }
+  .info dd { margin: .1rem 0 0; line-height: 1.5; }
+  .info a { color: var(--verde); }
+  .info .candado { padding: 2rem 1.25rem 1.25rem; text-align: center; color: var(--verde); }
+  .info .candado svg { width: 3rem; }
+  .info .candado p { color: #cfe9d3; line-height: 1.5; }
+  .info .candado .pista { color: var(--tenue); font-style: italic; }
+  .cerrar { display: block; width: calc(100% - 2.5rem); margin: 0 1.25rem 1.25rem; }
+
+  button.btn, a.btn {
+    font: inherit; font-size: 1.05rem; font-weight: 700; min-height: 3.2rem;
+    color: var(--verde); background: #000; border: 2px solid var(--verde); cursor: pointer; touch-action: manipulation;
+  }
+  button.btn:active, a.btn:active { background: var(--verde); color: #000; }
+  button.btn:focus-visible, a.btn:focus-visible { outline: 3px solid #fff; outline-offset: 3px; }
+  @media (hover: hover) { button.btn:hover, a.btn:hover { background: var(--verde); color: #000; } }
+
+  /* Barra inferior */
+  nav {
+    position: fixed; left: 0; right: 0; bottom: 0; z-index: 5;
+    display: flex; gap: .75rem; justify-content: center;
+    padding: .9rem 1.25rem calc(.9rem + env(safe-area-inset-bottom, 0px));
+    background: linear-gradient(to top, #000 70%, rgba(0,0,0,0));
+  }
+  nav .btn { flex: 1; max-width: 16rem; }
+
+  @media (prefers-reduced-motion: reduce) {
+    .pieza.nueva, .tablero.celebrar { animation: none; }
+    .barra i, .pieza { transition: none; }
+  }
+</style>
+</head>
+<body>
+
+<main>
+  <h1>Álbum</h1>
+  <p class="sub">Escanea stickers con la cámara AR. Cada uno desbloquea una pieza del rompecabezas.</p>
+
+  <div class="progreso"><strong id="contador">0/0</strong><span id="detalle-progreso"></span></div>
+  <div class="barra"><i id="relleno"></i></div>
+
+  <div class="tablero" id="tablero" role="group" aria-label="Rompecabezas del wallpaper"></div>
+  <p class="aviso" id="aviso" hidden></p>
+
+  <div class="final" id="final" hidden>
+    <h2 id="final-titulo">¡Rompecabezas completo!</h2>
+    <p>Tu wallpaper está desbloqueado.</p>
+    <a class="btn" id="descargar" download>Descargar wallpaper</a>
+  </div>
+</main>
+
+<nav>
+  <button class="btn" type="button" id="ir-galeria">Regresar a la galería</button>
+  <button class="btn" type="button" id="ir-ar">Ir a la cámara AR</button>
+</nav>
+
+<dialog id="detalle"><div class="info" id="detalle-contenido"></div></dialog>
+
+<script src="catalogo.js"></script>
+<script>
+  /* ============ CONFIGURACIÓN ============ */
+  const PAGINA_GALERIA = "galeria.html";
+  const PAGINA_AR      = "AR.html";
+  const CLAVE_VISTOS   = CLAVE_GUARDADO + "_vistos";   // piezas que ya se animaron
+  const CLAVE_FINAL    = CLAVE_GUARDADO + "_final";    // si ya se celebró el final
+  /* ======================================= */
+
+  const ICONO_CANDADO = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="5" y="11" width="14" height="9" rx="1"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/></svg>';
+
+  document.getElementById("ir-galeria").onclick = () => { location.href = PAGINA_GALERIA; };
+  document.getElementById("ir-ar").onclick      = () => { location.href = PAGINA_AR; };
+
+  function leer(clave) {
+    try { return JSON.parse(localStorage.getItem(clave)) || []; } catch (e) { return []; }
+  }
+  function guardar(clave, valor) {
+    try { localStorage.setItem(clave, JSON.stringify(valor)); } catch (e) {}
+  }
+  function el(tag, clase, texto) {
+    const n = document.createElement(tag);
+    if (clase) n.className = clase;
+    if (texto !== undefined) n.textContent = texto;
+    return n;
+  }
+
+  const tablero   = document.getElementById("tablero");
+  const aviso     = document.getElementById("aviso");
+  const final     = document.getElementById("final");
+  const detalle   = document.getElementById("detalle");
+  const contenido = document.getElementById("detalle-contenido");
+
+  let proporcion = null;   // ancho/alto del wallpaper, se mide al cargarlo
+  let piezas = [];         // geometría de cada pieza (misma cantidad que STICKERS)
+
+  // Mide el wallpaper y calcula la cuadrícula; después dibuja
+  function iniciar() {
+    if (!STICKERS.length) { mostrarAviso("Aún no hay stickers en el catálogo."); return; }
+    const img = new Image();
+    img.onload = () => {
+      proporcion = img.naturalWidth / img.naturalHeight;
+      piezas = calcularPiezas(STICKERS.length, proporcion);
+      tablero.style.setProperty("--ratio", proporcion);
+      dibujar();
+    };
+    img.onerror = () => mostrarAviso("No se pudo cargar la imagen del wallpaper (" + WALLPAPER.imagen + ").", true);
+    img.src = WALLPAPER.imagen;
+  }
+
+  function mostrarAviso(texto, error) {
+    aviso.textContent = texto; aviso.hidden = false;
+    aviso.classList.toggle("error", !!error);
+  }
+
+  function dibujar() {
+    if (!piezas.length) return;
+    const abiertos = new Set(leer(CLAVE_GUARDADO).filter(id => STICKERS.some(s => s.id === id)));
+    const vistos = new Set(leer(CLAVE_VISTOS));
+    const total = STICKERS.length, n = abiertos.size;
+    const completo = n === total;
+
+    // Progreso
+    document.getElementById("contador").textContent = `${n}/${total}`;
+    document.getElementById("detalle-progreso").textContent =
+      completo ? "¡Completo!" : `Faltan ${total - n} sticker${total - n === 1 ? "" : "s"}`;
+    document.getElementById("relleno").style.width = (n / total * 100) + "%";
+
+    // Piezas: la pieza i corresponde al sticker i del catálogo
+    tablero.replaceChildren();
+    tablero.classList.toggle("completo", completo);
+    STICKERS.forEach((s, i) => {
+      const g = piezas[i];
+      const abierta = abiertos.has(s.id);
+      const b = el("button", "pieza" + (abierta ? " abierta" : "") + (abierta && !vistos.has(s.id) ? " nueva" : ""));
+      b.type = "button";
+      b.setAttribute("aria-label", abierta ? `Pieza ${i + 1}: ${s.nombre}` : `Pieza ${i + 1} bloqueada`);
+      // Posición y tamaño en porcentaje, para que escale con el tablero
+      b.style.left = (g.x * 100) + "%";   b.style.top = (g.y * 100) + "%";
+      b.style.width = (g.w * 100) + "%";  b.style.height = (g.h * 100) + "%";
+      if (abierta) {
+        // Muestra únicamente el recorte del wallpaper que le toca a esta pieza
+        b.style.backgroundImage = `url("${WALLPAPER.imagen}")`;
+        b.style.backgroundSize = `${100 / g.w}% ${100 / g.h}%`;
+        b.style.backgroundPosition = `${g.w >= 1 ? 0 : g.x / (1 - g.w) * 100}% ${g.h >= 1 ? 0 : g.y / (1 - g.h) * 100}%`;
+        b.style.backgroundRepeat = "no-repeat";
+      } else {
+        b.innerHTML = ICONO_CANDADO;
+      }
+      b.onclick = () => abrirDetalle(s, abierta);
+      tablero.append(b);
+    });
+
+    // Final
+    final.hidden = !completo;
+    if (completo) {
+      document.getElementById("final-titulo").textContent = WALLPAPER.nombre || "¡Rompecabezas completo!";
+      const a = document.getElementById("descargar");
+      a.href = WALLPAPER.imagen;
+      const ext = (WALLPAPER.imagen.split(".").pop() || "jpg").toLowerCase();
+      a.download = (WALLPAPER.archivoDescarga || "wallpaper") + "." + ext;
+      if (!leer(CLAVE_FINAL).length) {
+        tablero.classList.add("celebrar");
+        guardar(CLAVE_FINAL, [1]);
+      }
+    }
+
+    guardar(CLAVE_VISTOS, [...abiertos]);   // la próxima vez ya no se animan
+  }
+
+  function abrirDetalle(s, abierta) {
+    contenido.replaceChildren();
+    if (!abierta) {
+      const c = el("div", "candado");
+      c.innerHTML = ICONO_CANDADO;
+      c.append(el("p", "", "Esta pieza sigue bloqueada. Escanea su sticker con la cámara AR para desbloquearla."));
+      if (s.pista) c.append(el("p", "pista", "Pista: " + s.pista));
+      contenido.append(c);
+    } else {
+      const img = el("img"); img.src = s.imagen; img.alt = s.nombre;
+      const t = el("div", "texto");
+      t.append(el("h3", "", s.nombre));
+      const dl = el("dl");
+      const campo = (k, v) => { if (v) { dl.append(el("dt", "", k), el("dd", "", v)); } };
+      campo("Autor", s.autor);
+      campo("Descripción", s.descripcion);
+      (s.enlaces || []).filter(l => /^https?:\/\//i.test(l.url)).forEach(l => {
+        const a = el("a", "", l.texto); a.href = l.url; a.target = "_blank"; a.rel = "noopener";
+        const dd = el("dd"); dd.append(a); dl.append(el("dt", "", "Enlace"), dd);
+      });
+      t.append(dl);
+      contenido.append(img, t);
+    }
+    const x = el("button", "btn cerrar", "Cerrar");
+    x.type = "button"; x.onclick = () => detalle.close();
+    contenido.append(x);
+    detalle.showModal();
+  }
+
+  // Tocar fuera de la ventana la cierra
+  detalle.addEventListener("click", e => { if (e.target === detalle) detalle.close(); });
+
+  iniciar();
+  window.addEventListener("pageshow", e => { if (e.persisted) dibujar(); });   // al volver desde la cámara AR
+</script>
+</body>
+</html>
