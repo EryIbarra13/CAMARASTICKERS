@@ -31,8 +31,8 @@
 
 const WALLPAPER = {
   imagen: "Wallpaper.jpg",                 // ← sube aquí la imagen que se va a dividir
-  nombre: "Wallpaper del Espejismo",       // título al completar el rompecabezas
-  archivoDescarga: "wallpaper-espejismo"   // nombre del archivo al descargarlo (sin extensión)
+  nombre: "Wallpaper leyendas legendarias",       // título al completar el rompecabezas
+  archivoDescarga: "wallpaper-leyendas-legendarias"   // nombre del archivo al descargarlo (sin extensión)
 };
 
 // Ajustes globales de la cámara AR
@@ -45,37 +45,34 @@ const CLAVE_GUARDADO = "galeria_desbloqueados";
 
 const STICKERS = [
   {
-    id: "Calavera",
-    nombre: "Calavera",
+    id: "NukaQuantum",
+    nombre: "NukaQuantum",
     imagen: "NukaQuantum.png",
     video: "Calavera.mp4",
     deteccion: { tipo: "oscuro", fondo: "#ffffff", sensibilidad: 1 },
-    autor: "Ilustrador anonimo",
-    descripcion: "Sin descripcion.",
-    pista: "Un hermoso esqueleto mientras una mujer lo observa.",
-    enlaces: [ /* { texto: "Instagram", url: "https://instagram.com/usuario" } */ ]
+    pista: "Pista1."
+    //autor: "", ESTE APARTADO SE AGREGA SI DESEAN AGREGAR ARTISTAS
+    //enlaces: [ /* { texto: "Instagram", url: "https://instagram.com/usuario" } */ ] ESTE APARTADO SE AGREGA SI DESEAN AGREGAR FANARTS Y DAR CREDITOS
   },
   {
-    id: "Charro",
-    nombre: "El Charro Negro",
+    id: "NukaCherry",
+    nombre: "NukaCherry",
     imagen: "Nukacherry.png",
     video: "Calavera.mp4",
-    deteccion: { tipo: "claro", fondo: "#ffffff", sensibilidad: 1 },
-    autor: "Grecia Morales (Suki)",
-    descripcion: "Las monedas de oro que brillan en la penumbra, son pagadas con el precio del alma.",
-    pista: "Una inigualable leyenda mexicana.",
-    enlaces: [{ texto: "Instagram", url: "https://www.instagram.com/suki_owo_" }]
+    deteccion: { tipo: "claro", fondo: "#ffffff", sensibilidad: 0.8 },
+    pista: "Pista2",
+    //autor: ""
+    //enlaces: [{ texto: "Instagram", url: "" }]
   },
   {
-    id: "Osito",
-    nombre: "Mi corazon te lo regalo",
+    id: "NukaCola",
+    nombre: "NukaCola",
     imagen: "Nukacola.png",
     video: "Calavera.mp4",
     deteccion: { tipo: "normal", fondo: "#ffffff", sensibilidad: 1 },
-    autor: "Bombon Skylos",
-    descripcion: "Trata de retratar de forma cruda y literal a mi personaje regalando su corazon.",
-    pista: "No hay nada mas tierno que alguien regalando su corazon.",
-    enlaces: [{ texto: "Instagram", url: "https://www.instagram.com/bombon_skylos" }]
+    //autor: "",
+    pista: "Pista3",
+    //enlaces: [{ texto: "Instagram", url: "" }]
   }
   /* Para agregar otro sticker, escribe una coma después de la llave anterior y pega:
   ,{
