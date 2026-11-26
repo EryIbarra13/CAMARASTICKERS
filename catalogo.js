@@ -69,7 +69,7 @@ const STICKERS = [
     nombre: "NukaCola",
     imagen: "Nukacola.png",
     video: "Calavera.mp4",
-    deteccion: { tipo: "normal", fondo: "#ffffff", sensibilidad: 1 },
+    deteccion: { tipo: "normal", fondo: "#ffffff", sensibilidad: 0.8 },
     //autor: "",
     pista: "Pista3"
     //enlaces: [{ texto: "Instagram", url: "" }]
