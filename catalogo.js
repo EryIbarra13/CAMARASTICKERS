@@ -60,7 +60,7 @@ const STICKERS = [
     imagen: "Nukacherry.png",
     video: "Calavera.mp4",
     deteccion: { tipo: "claro", fondo: "#ffffff", sensibilidad: 0.8 },
-    pista: "Pista2",
+    pista: "Pista2"
     //autor: ""
     //enlaces: [{ texto: "Instagram", url: "" }]
   },
@@ -71,7 +71,7 @@ const STICKERS = [
     video: "Calavera.mp4",
     deteccion: { tipo: "normal", fondo: "#ffffff", sensibilidad: 1 },
     //autor: "",
-    pista: "Pista3",
+    pista: "Pista3"
     //enlaces: [{ texto: "Instagram", url: "" }]
   }
   /* Para agregar otro sticker, escribe una coma después de la llave anterior y pega:
