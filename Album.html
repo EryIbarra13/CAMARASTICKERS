@@ -131,7 +131,6 @@
 </main>
 
 <nav>
-  <button class="btn" type="button" id="ir-galeria">Regresar a la galería</button>
   <button class="btn" type="button" id="ir-ar">Ir a la cámara AR</button>
 </nav>
 
@@ -140,7 +139,6 @@
 <script src="catalogo.js"></script>
 <script>
   /* ============ CONFIGURACIÓN ============ */
-  const PAGINA_GALERIA = "galeria.html";
   const PAGINA_AR      = "AR.html";
   const CLAVE_VISTOS   = CLAVE_GUARDADO + "_vistos";   // piezas que ya se animaron
   const CLAVE_FINAL    = CLAVE_GUARDADO + "_final";    // si ya se celebró el final
@@ -148,7 +146,6 @@
 
   const ICONO_CANDADO = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="5" y="11" width="14" height="9" rx="1"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/></svg>';
 
-  document.getElementById("ir-galeria").onclick = () => { location.href = PAGINA_GALERIA; };
   document.getElementById("ir-ar").onclick      = () => { location.href = PAGINA_AR; };
 
   function leer(clave) {
