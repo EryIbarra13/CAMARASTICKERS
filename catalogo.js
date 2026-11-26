@@ -29,7 +29,7 @@ const STICKERS = [
   {
     id: "Calavera",
     nombre: "Calavera",
-    imagen: "Calavera.png",
+    imagen: "NukaQuantum.png",
     video: "Calavera.mp4",
     autor: "Ilustrador anonimo",
     descripcion: "Sin descripcion.",
@@ -39,7 +39,7 @@ const STICKERS = [
   {
     id: "Charro",
     nombre: "El Charro Negro",
-    imagen: "CharroNegro.jpg",
+    imagen: "Nukacherry.png",
     video: "Calavera.mp4",
     autor: "Grecia Morales (Suki)",
     descripcion: "Las monedas de oro que brillan en la penumbra, son pagadas con el precio del alma.",
@@ -49,7 +49,7 @@ const STICKERS = [
   {
     id: "Osito",
     nombre: "Mi corazon te lo regalo",
-    imagen: "Osito.png",
+    imagen: "Nukacola.png",
     video: "Calavera.mp4",
     autor: "Bombon Skylos",
     descripcion: "Trata de retratar de forma cruda y literal a mi personaje regalando su corazon.",
