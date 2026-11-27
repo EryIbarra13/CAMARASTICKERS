@@ -37,7 +37,7 @@ const WALLPAPER = {
 
 // Ajustes globales de la cámara AR
 const AJUSTES_AR = {
-  exposicion: 0.6   // -1 a 1 (0.6 era el valor fijo anterior; con stickers claros prueba 0 o -0.3)
+  exposicion: 0.2   // -1 a 1 (ajustado para evitar reflejos/sobreexposición en chapas brillantes)
 };
 
 // Clave donde se guarda el progreso en el celular (la usan AR.html y Album.html)
@@ -49,44 +49,25 @@ const STICKERS = [
     nombre: "NukaQuantum",
     imagen: "NukaQuantum.png",
     video: "Calavera.mp4",
-    deteccion: { tipo: "oscuro", fondo: "#ffffff", sensibilidad: 1 },
+    deteccion: { tipo: "oscuro", fondo: "#ffffff", sensibilidad: 0.95 },
     pista: "Pista1."
-    //autor: "", ESTE APARTADO SE AGREGA SI DESEAN AGREGAR ARTISTAS
-    //enlaces: [ /* { texto: "Instagram", url: "https://instagram.com/usuario" } */ ] ESTE APARTADO SE AGREGA SI DESEAN AGREGAR FANARTS Y DAR CREDITOS
   },
   {
     id: "NukaCherry",
     nombre: "NukaCherry",
     imagen: "Nukacherry.png",
     video: "Calavera.mp4",
-    deteccion: { tipo: "claro", fondo: "#ffffff", sensibilidad: 1 },
+    deteccion: { tipo: "normal", fondo: "#ffffff", sensibilidad: 0.9 },
     pista: "Pista2"
-    //autor: ""
-    //enlaces: [{ texto: "Instagram", url: "" }]
   },
   {
     id: "NukaCola",
     nombre: "NukaCola",
     imagen: "Nukacola.png",
     video: "Calavera.mp4",
-    deteccion: { tipo: "normal", fondo: "#ffffff", sensibilidad: 0.8 },
-    //autor: "",
+    deteccion: { tipo: "normal", fondo: "#ffffff", sensibilidad: 0.9 },
     pista: "Pista3"
-    //enlaces: [{ texto: "Instagram", url: "" }]
   }
-  /* Para agregar otro sticker, escribe una coma después de la llave anterior y pega:
-  ,{
-    id: "NuevoSticker",
-    nombre: "Nombre visible",
-    imagen: "NuevoSticker.jpg",
-    video: "NuevoSticker.mp4",
-    deteccion: { tipo: "normal", fondo: "#ffffff", sensibilidad: 1 },
-    autor: "Nombre del autor",
-    descripcion: "Descripción.",
-    pista: "Pista para encontrarlo.",
-    enlaces: []
-  }
-  */
 ];
 
 /* =====================================================================
@@ -97,17 +78,15 @@ const STICKERS = [
    ===================================================================== */
 function calcularPiezas(cantidad, proporcion) {   // proporcion = ancho / alto de la imagen
   if (cantidad < 1) return [];
-  // Elige el número de filas que deja las piezas lo más cuadradas posible
   let filas = 1, mejor = Infinity;
   for (let f = 1; f <= cantidad; f++) {
     const colsMedias = cantidad / f;
-    const forma = Math.abs(Math.log((proporcion * f) / colsMedias));   // 0 = pieza cuadrada
+    const forma = Math.abs(Math.log((proporcion * f) / colsMedias));
     if (forma < mejor) { mejor = forma; filas = f; }
   }
   const base = Math.floor(cantidad / filas), extra = cantidad % filas;
   const piezas = [];
   for (let r = 0; r < filas; r++) {
-    // reparte las columnas extra de forma pareja entre las filas
     const cols = base + (Math.floor(((r + 1) * extra) / filas) - Math.floor((r * extra) / filas));
     for (let c = 0; c < cols; c++) {
       piezas.push({ x: c / cols, y: r / filas, w: 1 / cols, h: 1 / filas });

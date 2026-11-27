@@ -1,0 +1,425 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#581C59">
+<title>Álbum · Rompecabezas</title>
+<style>
+  /* ============ COLORES (misma identidad visual que Index.html) ============ */
+  :root {
+    --fondo:        #581C59;   /* fondo principal: color de ARRIBA del degradado */
+    --fondo-2:      #351040;   /* color de ABAJO del degradado */
+    --direccion:    180deg;
+    --llamativo:    #F2E205;   /* amarillo vivo: bordes, acentos y brillos */
+    --boton-claro:  #D9BA1E;   /* variación 1 del botón y textos secundarios */
+    --boton-oscuro: #A67C2E;   /* variación 2 del botón */
+    --barra:        #201A42;   /* barra inferior */
+    --fondo-pieza:  #2B1438;   /* fondo oscuro para piezas bloqueadas */
+    --texto:        #ffffff;
+  }
+
+  html, body { margin: 0; background: var(--fondo-2); }
+  body {
+    min-height: 100dvh;
+    background: linear-gradient(var(--direccion), var(--fondo), var(--fondo-2));
+    color: var(--texto);
+    font-family: system-ui, -apple-system, "Segoe UI", sans-serif;
+    -webkit-tap-highlight-color: transparent;
+    /* Espacio inferior para que el contenido no quede tapado por la barra fija y el botón flotante */
+    padding: 1.5rem 1.25rem calc(9.5rem + env(safe-area-inset-bottom, 0px));
+    box-sizing: border-box;
+  }
+
+  main { max-width: 36rem; margin: 0 auto; }
+  h1 {
+    margin: 0 0 .35rem;
+    font-size: 1.85rem;
+    font-weight: 800;
+    color: var(--texto);
+    letter-spacing: .01em;
+  }
+  .sub {
+    margin: 0 0 1.25rem;
+    color: rgba(255, 255, 255, .85);
+    line-height: 1.45;
+    font-size: .98rem;
+  }
+
+  /* Progreso */
+  .progreso { display: flex; justify-content: space-between; align-items: baseline; margin-bottom: .5rem; }
+  .progreso strong { font-size: 1.25rem; color: var(--llamativo); }
+  .progreso span { color: var(--boton-claro); font-size: .95rem; font-weight: 500; }
+  .barra {
+    height: 8px;
+    background: rgba(32, 26, 66, .8);
+    border-radius: 999px;
+    border: 1px solid rgba(242, 226, 5, .25);
+    margin-bottom: 1.25rem;
+    overflow: hidden;
+  }
+  .barra i {
+    display: block; height: 100%; width: 0;
+    background: linear-gradient(90deg, var(--boton-oscuro), var(--llamativo));
+    border-radius: 999px;
+    transition: width .6s ease;
+  }
+
+  /* Tablero: su proporción es la de la imagen; --ratio lo pone el script */
+  .tablero {
+    position: relative; margin: 0 auto;
+    aspect-ratio: var(--ratio, 0.5625);
+    width: min(100%, calc(62dvh * var(--ratio, 0.5625)));
+    background: var(--fondo-pieza);
+    border: 3px solid var(--llamativo);
+    border-radius: 14px;
+    overflow: hidden;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, .45);
+    box-sizing: content-box;
+  }
+  .pieza {
+    position: absolute; padding: 0; margin: 0; border: 0; cursor: pointer;
+    font: inherit; color: var(--boton-claro); touch-action: manipulation;
+    background-color: var(--fondo-pieza);
+    box-shadow: inset 0 0 0 1px rgba(242, 226, 5, .18);
+    display: flex; align-items: center; justify-content: center;
+    transition: box-shadow .6s, background-color .3s;
+  }
+  .pieza svg { width: 38%; max-width: 1.7rem; height: auto; opacity: .8; }
+  .pieza.abierta { color: transparent; box-shadow: inset 0 0 0 1px rgba(32, 26, 66, .45); }
+  .pieza.abierta svg { display: none; }
+  .pieza.nueva { animation: aparece 1.1s ease-out both; }
+  .pieza:focus-visible { outline: 3px solid #fff; outline-offset: -3px; z-index: 2; }
+  @media (hover: hover) {
+    .pieza:hover {
+      box-shadow: inset 0 0 0 2px var(--llamativo);
+      background-color: #381B48;
+      z-index: 1;
+    }
+  }
+  @keyframes aparece {
+    0%   { filter: brightness(3) saturate(0); opacity: 0; transform: scale(.85); }
+    55%  { filter: brightness(1.6); opacity: 1; transform: scale(1.04); z-index: 3; }
+    100% { filter: none; opacity: 1; transform: scale(1); }
+  }
+
+  /* Rompecabezas completo: se funden las costuras */
+  .tablero.completo { border-color: var(--llamativo); box-shadow: 0 0 32px rgba(242, 226, 5, .55); }
+  .tablero.completo .pieza { box-shadow: none; cursor: default; }
+  .tablero.celebrar { animation: brillo 1.6s ease-out 1; }
+  @keyframes brillo {
+    0%   { box-shadow: 0 0 0 rgba(242, 226, 5, 0); }
+    40%  { box-shadow: 0 0 60px rgba(242, 226, 5, 1); }
+    100% { box-shadow: 0 0 32px rgba(242, 226, 5, .55); }
+  }
+
+  .aviso { text-align: center; color: var(--boton-claro); margin: 1rem 0 0; line-height: 1.45; }
+  .aviso.error { color: #ff8a8a; }
+
+  .final { text-align: center; margin-top: 1.4rem; }
+  .final h2 { margin: 0 0 .35rem; font-size: 1.35rem; color: var(--llamativo); }
+  .final p { margin: 0 0 1.1rem; color: rgba(255, 255, 255, .9); }
+  .final .btn {
+    display: inline-flex; align-items: center; justify-content: center;
+    padding: 0 1.8rem; text-decoration: none; box-sizing: border-box;
+  }
+  [hidden] { display: none !important; }
+
+  /* Ventana de información (Modal) */
+  dialog {
+    width: min(92vw, 30rem); max-height: 88dvh; overflow: auto; box-sizing: border-box;
+    background: linear-gradient(180deg, var(--fondo), var(--fondo-2));
+    color: var(--texto);
+    border: 3px solid var(--llamativo);
+    border-radius: 18px;
+    padding: 0;
+    box-shadow: 0 14px 40px rgba(0, 0, 0, .75);
+  }
+  dialog::backdrop { background: rgba(15, 8, 22, .85); backdrop-filter: blur(3px); }
+  .info img { width: 100%; max-height: 50dvh; object-fit: contain; display: block; background: var(--barra); }
+  .info .texto { padding: 1.2rem 1.35rem 1.25rem; }
+  .info h3 { margin: 0 0 .8rem; font-size: 1.35rem; color: var(--llamativo); }
+  .info dt { color: var(--boton-claro); font-size: .85rem; font-weight: 700; text-transform: uppercase; letter-spacing: .04em; margin-top: .8rem; }
+  .info dd { margin: .2rem 0 0; line-height: 1.5; color: rgba(255, 255, 255, .92); }
+  .info a { color: var(--llamativo); font-weight: 600; }
+  .info .candado { padding: 2rem 1.35rem 1.25rem; text-align: center; color: var(--llamativo); }
+  .info .candado svg { width: 3rem; }
+  .info .candado p { color: var(--texto); line-height: 1.5; }
+  .info .candado .pista { color: var(--boton-claro); font-style: italic; }
+  .cerrar { display: block; width: calc(100% - 2.7rem); margin: 0 1.35rem 1.35rem; }
+
+  /* Botones con el estilo exacto de Index.html */
+  button.btn, a.btn {
+    font: inherit; font-size: 1.05rem; font-weight: 700; letter-spacing: .03em;
+    min-height: 3.3rem;
+    color: var(--texto);
+    text-shadow: 0 1px 3px rgba(88, 28, 89, .85);
+    background: linear-gradient(180deg, var(--boton-claro), var(--boton-oscuro));
+    border: 3px solid var(--llamativo);
+    border-radius: 999px;
+    box-shadow: 0 0 20px rgba(242, 226, 5, .3);
+    cursor: pointer; touch-action: manipulation;
+    transition: transform .15s, box-shadow .2s, filter .2s;
+  }
+  button.btn:active, a.btn:active { transform: scale(.97); filter: brightness(.9); }
+  button.btn:focus-visible, a.btn:focus-visible { outline: 3px solid #fff; outline-offset: 3px; }
+  @media (hover: hover) {
+    button.btn:hover, a.btn:hover {
+      box-shadow: 0 0 28px rgba(242, 226, 5, .6);
+      filter: brightness(1.08);
+    }
+  }
+
+  /* Contenedor inferior fijo: botón AR + barra inferior de Index */
+  .zona-inferior {
+    position: fixed; left: 0; right: 0; bottom: 0; z-index: 5;
+    display: flex; flex-direction: column; align-items: center;
+  }
+  .accion-flotante {
+    width: 100%;
+    display: flex; justify-content: center;
+    padding: .75rem 1.25rem .85rem;
+    box-sizing: border-box;
+    background: linear-gradient(to top, var(--fondo-2) 55%, rgba(53, 16, 64, 0));
+  }
+  .accion-flotante .btn { width: min(100%, 20rem); }
+
+  /* Barra inferior de color sólido con el logo estático (igual que Index.html) */
+  footer {
+    width: 100%;
+    display: flex; align-items: center; justify-content: center;
+    background: var(--barra);
+    padding: .85rem 1rem calc(.85rem + env(safe-area-inset-bottom, 0px));
+    box-sizing: border-box;
+  }
+  #logo-barra { display: block; height: 2.8rem; width: auto; max-width: 70vw; object-fit: contain; }
+  .falta {
+    display: flex; align-items: center; justify-content: center; text-align: center;
+    border: 2px dashed rgba(255, 255, 255, .5); border-radius: 12px;
+    color: rgba(255, 255, 255, .8); font-size: .85rem; padding: 0 1rem; height: 2.8rem;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .pieza.nueva, .tablero.celebrar { animation: none; }
+    .barra i, .pieza, button.btn, a.btn { transition: none; }
+  }
+</style>
+</head>
+<body>
+
+<main>
+  <h1>Álbum</h1>
+  <p class="sub">Escanea stickers con la cámara AR. Cada uno desbloquea una pieza del rompecabezas.</p>
+
+  <div class="progreso"><strong id="contador">0/0</strong><span id="detalle-progreso"></span></div>
+  <div class="barra"><i id="relleno"></i></div>
+
+  <div class="tablero" id="tablero" role="group" aria-label="Rompecabezas del wallpaper"></div>
+  <p class="aviso" id="aviso" hidden></p>
+
+  <div class="final" id="final" hidden>
+    <h2 id="final-titulo">¡Rompecabezas completo!</h2>
+    <p>Tu wallpaper está desbloqueado.</p>
+    <a class="btn" id="descargar" download>Descargar wallpaper</a>
+  </div>
+</main>
+
+<div class="zona-inferior">
+  <div class="accion-flotante">
+    <button class="btn" type="button" id="ir-ar">Ir a la cámara AR</button>
+  </div>
+  <footer>
+    <img id="logo-barra" alt="Logo secundario">
+  </footer>
+</div>
+
+<dialog id="detalle"><div class="info" id="detalle-contenido"></div></dialog>
+
+<script src="catalogo.js"></script>
+<script>
+  /* ============ CONFIGURACIÓN ============ */
+  const PAGINA_AR      = "AR.html";
+  const LOGO_BARRA_SRC = "LogoBarra.png";            // mismo logo de la barra inferior de Index.html
+  const RECORTAR_LOGOS = true;
+  const CLAVE_VISTOS   = CLAVE_GUARDADO + "_vistos";   // piezas que ya se animaron
+  const CLAVE_FINAL    = CLAVE_GUARDADO + "_final";    // si ya se celebró el final
+  /* ======================================= */
+
+  const ICONO_CANDADO = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="5" y="11" width="14" height="9" rx="1"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/></svg>';
+
+  document.getElementById("ir-ar").onclick = () => { location.href = PAGINA_AR; };
+
+  /* --- Carga y recorte de márgenes transparentes para el logo de la barra --- */
+  function recortar(img) {
+    try {
+      const c = document.createElement("canvas");
+      c.width = img.naturalWidth; c.height = img.naturalHeight;
+      const g = c.getContext("2d", { willReadFrequently: true });
+      g.drawImage(img, 0, 0);
+      const d = g.getImageData(0, 0, c.width, c.height).data;
+      let x0 = c.width, y0 = c.height, x1 = -1, y1 = -1;
+      for (let y = 0; y < c.height; y++) {
+        for (let x = 0; x < c.width; x++) {
+          if (d[(y * c.width + x) * 4 + 3] > 10) {
+            if (x < x0) x0 = x; if (x > x1) x1 = x;
+            if (y < y0) y0 = y; if (y > y1) y1 = y;
+          }
+        }
+      }
+      if (x1 < 0) return null;
+      const w = x1 - x0 + 1, h = y1 - y0 + 1;
+      if (w >= c.width - 2 && h >= c.height - 2) return null;
+      const o = document.createElement("canvas"); o.width = w; o.height = h;
+      o.getContext("2d").drawImage(c, x0, y0, w, h, 0, 0, w, h);
+      return o.toDataURL("image/png");
+    } catch (e) { return null; }
+  }
+
+  function ponerLogo(id, src) {
+    const img = document.getElementById(id);
+    const prueba = new Image();
+    prueba.onload = () => { img.src = (RECORTAR_LOGOS && recortar(prueba)) || src; };
+    prueba.onerror = () => {
+      const caja = document.createElement("div");
+      caja.id = id; caja.className = "falta";
+      caja.textContent = "Falta " + src;
+      img.replaceWith(caja);
+    };
+    prueba.src = src;
+  }
+  ponerLogo("logo-barra", LOGO_BARRA_SRC);
+
+  /* --- Lógica del álbum y rompecabezas --- */
+  function leer(clave) {
+    try { return JSON.parse(localStorage.getItem(clave)) || []; } catch (e) { return []; }
+  }
+  function guardar(clave, valor) {
+    try { localStorage.setItem(clave, JSON.stringify(valor)); } catch (e) {}
+  }
+  function el(tag, clase, texto) {
+    const n = document.createElement(tag);
+    if (clase) n.className = clase;
+    if (texto !== undefined) n.textContent = texto;
+    return n;
+  }
+
+  const tablero   = document.getElementById("tablero");
+  const aviso     = document.getElementById("aviso");
+  const final     = document.getElementById("final");
+  const detalle   = document.getElementById("detalle");
+  const contenido = document.getElementById("detalle-contenido");
+
+  let proporcion = null;   // ancho/alto del wallpaper, se mide al cargarlo
+  let piezas = [];         // geometría de cada pieza (misma cantidad que STICKERS)
+
+  // Mide el wallpaper y calcula la cuadrícula; después dibuja
+  function iniciar() {
+    if (!STICKERS.length) { mostrarAviso("Aún no hay stickers en el catálogo."); return; }
+    const img = new Image();
+    img.onload = () => {
+      proporcion = img.naturalWidth / img.naturalHeight;
+      piezas = calcularPiezas(STICKERS.length, proporcion);
+      tablero.style.setProperty("--ratio", proporcion);
+      dibujar();
+    };
+    img.onerror = () => mostrarAviso("No se pudo cargar la imagen del wallpaper (" + WALLPAPER.imagen + ").", true);
+    img.src = WALLPAPER.imagen;
+  }
+
+  function mostrarAviso(texto, error) {
+    aviso.textContent = texto; aviso.hidden = false;
+    aviso.classList.toggle("error", !!error);
+  }
+
+  function dibujar() {
+    if (!piezas.length) return;
+    const abiertos = new Set(leer(CLAVE_GUARDADO).filter(id => STICKERS.some(s => s.id === id)));
+    const vistos = new Set(leer(CLAVE_VISTOS));
+    const total = STICKERS.length, n = abiertos.size;
+    const completo = n === total;
+
+    // Progreso
+    document.getElementById("contador").textContent = `${n}/${total}`;
+    document.getElementById("detalle-progreso").textContent =
+      completo ? "¡Completo!" : `Faltan ${total - n} sticker${total - n === 1 ? "" : "s"}`;
+    document.getElementById("relleno").style.width = (n / total * 100) + "%";
+
+    // Piezas: la pieza i corresponde al sticker i del catálogo
+    tablero.replaceChildren();
+    tablero.classList.toggle("completo", completo);
+    STICKERS.forEach((s, i) => {
+      const g = piezas[i];
+      const abierta = abiertos.has(s.id);
+      const b = el("button", "pieza" + (abierta ? " abierta" : "") + (abierta && !vistos.has(s.id) ? " nueva" : ""));
+      b.type = "button";
+      b.setAttribute("aria-label", abierta ? `Pieza ${i + 1}: ${s.nombre}` : `Pieza ${i + 1} bloqueada`);
+      // Posición y tamaño en porcentaje, para que escale con el tablero
+      b.style.left = (g.x * 100) + "%";   b.style.top = (g.y * 100) + "%";
+      b.style.width = (g.w * 100) + "%";  b.style.height = (g.h * 100) + "%";
+      if (abierta) {
+        // Muestra únicamente el recorte del wallpaper que le toca a esta pieza
+        b.style.backgroundImage = `url("${WALLPAPER.imagen}")`;
+        b.style.backgroundSize = `${100 / g.w}% ${100 / g.h}%`;
+        b.style.backgroundPosition = `${g.w >= 1 ? 0 : g.x / (1 - g.w) * 100}% ${g.h >= 1 ? 0 : g.y / (1 - g.h) * 100}%`;
+        b.style.backgroundRepeat = "no-repeat";
+      } else {
+        b.innerHTML = ICONO_CANDADO;
+      }
+      b.onclick = () => abrirDetalle(s, abierta);
+      tablero.append(b);
+    });
+
+    // Final
+    final.hidden = !completo;
+    if (completo) {
+      document.getElementById("final-titulo").textContent = WALLPAPER.nombre || "¡Rompecabezas completo!";
+      const a = document.getElementById("descargar");
+      a.href = WALLPAPER.imagen;
+      const ext = (WALLPAPER.imagen.split(".").pop() || "jpg").toLowerCase();
+      a.download = (WALLPAPER.archivoDescarga || "wallpaper") + "." + ext;
+      if (!leer(CLAVE_FINAL).length) {
+        tablero.classList.add("celebrar");
+        guardar(CLAVE_FINAL, [1]);
+      }
+    }
+
+    guardar(CLAVE_VISTOS, [...abiertos]);   // la próxima vez ya no se animan
+  }
+
+  function abrirDetalle(s, abierta) {
+    contenido.replaceChildren();
+    if (!abierta) {
+      const c = el("div", "candado");
+      c.innerHTML = ICONO_CANDADO;
+      c.append(el("p", "", "Esta pieza sigue bloqueada. Escanea su sticker con la cámara AR para desbloquearla."));
+      if (s.pista) c.append(el("p", "pista", "Pista: " + s.pista));
+      contenido.append(c);
+    } else {
+      const img = el("img"); img.src = s.imagen; img.alt = s.nombre;
+      const t = el("div", "texto");
+      t.append(el("h3", "", s.nombre));
+      const dl = el("dl");
+      const campo = (k, v) => { if (v) { dl.append(el("dt", "", k), el("dd", "", v)); } };
+      campo("Autor", s.autor);
+      campo("Descripción", s.descripcion);
+      (s.enlaces || []).filter(l => /^https?:\/\//i.test(l.url)).forEach(l => {
+        const a = el("a", "", l.texto); a.href = l.url; a.target = "_blank"; a.rel = "noopener";
+        const dd = el("dd"); dd.append(a); dl.append(el("dt", "", "Enlace"), dd);
+      });
+      t.append(dl);
+      contenido.append(img, t);
+    }
+    const x = el("button", "btn cerrar", "Cerrar");
+    x.type = "button"; x.onclick = () => detalle.close();
+    contenido.append(x);
+    detalle.showModal();
+  }
+
+  // Tocar fuera de la ventana la cierra
+  detalle.addEventListener("click", e => { if (e.target === detalle) detalle.close(); });
+
+  iniciar();
+  window.addEventListener("pageshow", e => { if (e.persisted) dibujar(); });   // al volver desde la cámara AR
+</script>
+</body>
+</html>
